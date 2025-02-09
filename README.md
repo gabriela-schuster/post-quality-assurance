@@ -67,5 +67,3 @@ docker run --rm -i --network=host grafana/k6 run - <script.js
 ## Image Evidence
 
 ![alt text](image-2.png)
-```
-````
