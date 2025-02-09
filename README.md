@@ -26,7 +26,7 @@ npx cypress open
 
 ```
 cd backend
-npx nest new backend
+npx jest src/users/
 ```
 
 ### Image Evidence:
@@ -54,15 +54,19 @@ npx nest new backend
 
 # Back-end Performance Testing
 
-```
+````
+
 cd backend
 nest start
 
 docker pull grafana/k6
 cd ../k6
 docker run --rm -i --network=host grafana/k6 run - <script.js
+
 ```
 
 ## Image Evidence
 
 ![alt text](image-2.png)
+```
+````
