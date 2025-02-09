@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+
+		body {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 20px;
+		}
+
+		.container {
+			background: white;
+			padding: 40px;
+			border-radius: 10px;
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+			width: 100%;
+			max-width: 500px;
+		}
+
+		h1 {
+			text-align: center;
+			color: #333;
+			margin-bottom: 30px;
+			font-size: 28px;
+		}
+
+		.form-group {
+			margin-bottom: 20px;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 8px;
+			color: #555;
+			font-weight: 500;
+		}
+
+		input {
+			width: 100%;
+			padding: 12px;
+			border: 2px solid #ddd;
+			border-radius: 6px;
+			font-size: 16px;
+			transition: border-color 0.3s ease;
+		}
+
+		input:focus {
+			outline: none;
+			border-color: #667eea;
+		}
+
+		.error {
+			color: #dc3545;
+			font-size: 14px;
+			margin-top: 5px;
+			display: none;
+		}
+
+		button {
+			width: 100%;
+			padding: 14px;
+			background: #667eea;
+			color: white;
+			border: none;
+			border-radius: 6px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+		}
+
+		button:hover {
+			background: #5a6fd6;
+		}
+
+		button:disabled {
+			background: #cccccc;
+			cursor: not-allowed;
+		}
+
+		.input-error {
+			border-color: #dc3545;
+		}
+
+		.input-success {
+			border-color: #28a745;
+		}
+
+		.password-requirements {
+			font-size: 14px;
+			color: #666;
+			margin-top: 5px;
+		}
+
+		.requirement {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+			margin-top: 3px;
+		}
+
+		.requirement::before {
+			content: "•";
+			color: #dc3545;
+		}
+
+		.requirement.met::before {
+			content: "✓";
+			color: #28a745;
+		}
+
+		/* Success Popup Styles */
+		.popup-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.5);
+			display: none;
+			justify-content: center;
+			align-items: center;
+			z-index: 1000;
+		}
+
+		.popup {
+			background: white;
+			padding: 30px;
+			border-radius: 10px;
+			text-align: center;
+			max-width: 400px;
+			position: relative;
+			animation: popupAnimation 0.3s ease-out;
+		}
+
+		@keyframes popupAnimation {
+			from {
+				transform: scale(0.7);
+				opacity: 0;
+			}
+
+			to {
+				transform: scale(1);
+				opacity: 1;
+			}
+		}
+
+		.popup h2 {
+			color: #28a745;
+			margin-bottom: 15px;
+		}
+
+		.popup p {
+			color: #666;
+			margin-bottom: 20px;
+		}
+
+		.popup button {
+			width: auto;
+			min-width: 120px;
+		}
+
+		.success-icon {
+			font-size: 48px;
+			color: #28a745;
+			margin-bottom: 15px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h1>Create Account</h1>
+		<form id="registrationForm" novalidate>
+			<div class="form-group">
+				<label for="name">Full Name*</label>
+				<input type="text" id="name" name="name" required>
+				<div class="error" id="nameError">Please enter your full name</div>
+			</div>
+
+			<div class="form-group">
+				<label for="email">Email Address*</label>
+				<input type="email" id="email" name="email" required>
+				<div class="error" id="emailError">Please enter a valid email address</div>
+			</div>
+
+			<div class="form-group">
+				<label for="confirmEmail">Confirm Email*</label>
+				<input type="email" id="confirmEmail" name="confirmEmail" required>
+				<div class="error" id="confirmEmailError">Email addresses do not match</div>
+			</div>
+
+			<div class="form-group">
+				<label for="password">Password*</label>
+				<input type="password" id="password" name="password" required>
+				<div class="password-requirements">
+					<div class="requirement" id="lengthReq">At least 8 characters</div>
+					<div class="requirement" id="upperReq">At least 1 uppercase letter</div>
+					<div class="requirement" id="numberReq">At least 1 number</div>
+				</div>
+				<div class="error" id="passwordErrorWeak">Please enter a stronger password</div>
+				<div class="error" id="passwordErrorShort">Please enter a password at least 8 characters long</div>
+			</div>
+
+			<button type="submit" id="submitBtn" disabled>Create Account</button>
+		</form>
+	</div>
+
+	<!-- Success Popup -->
+	<div class="popup-overlay" id="successPopup">
+		<div class="popup">
+			<div class="success-icon">✓</div>
+			<h2>Registration Successful!</h2>
+			<p>Your account has been created successfully. Welcome aboard!</p>
+			<button onclick="closePopup()">Got it!</button>
+		</div>
+	</div>
+
+	<script>
+		const form = document.getElementById('registrationForm');
+		const submitBtn = document.getElementById('submitBtn');
+		const inputs = form.querySelectorAll('input');
+		const successPopup = document.getElementById('successPopup');
+		const passwordReqs = {
+			length: document.getElementById('lengthReq'),
+			upper: document.getElementById('upperReq'),
+			number: document.getElementById('numberReq')
+		};
+
+		// Real-time validation
+		inputs.forEach(input => {
+			input.addEventListener('input', validateForm);
+		});
+
+		function validateForm() {
+			let isValid = true;
+			const name = document.getElementById('name');
+			const email = document.getElementById('email');
+			const confirmEmail = document.getElementById('confirmEmail');
+			const password = document.getElementById('password');
+
+			// Name validation
+			const fullName = name.value.trim();
+			const nameParts = fullName.split(/\s+/).filter(part => part.length > 0);
+
+			if (!fullName || nameParts.length < 2) {
+				showError(name, 'nameError');
+				isValid = false;
+			} else {
+				hideError(name, 'nameError');
+			}
+
+			// Email validation
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email.value)) {
+				showError(email, 'emailError');
+				isValid = false;
+			} else {
+				hideError(email, 'emailError');
+			}
+
+			// Confirm email validation
+			if (email.value !== confirmEmail.value || !confirmEmail.value) {
+				showError(confirmEmail, 'confirmEmailError');
+				isValid = false;
+			} else {
+				hideError(confirmEmail, 'confirmEmailError');
+			}
+
+			// Password validation
+			const passwordValidation = validatePassword(password.value);
+			if (!passwordValidation.isValid) {
+				if (!passwordValidation.hasMinLength) {
+					showError(password, 'passwordErrorShort');
+					hideError(password, 'passwordErrorWeak');
+				} else {
+					showError(password, 'passwordErrorWeak');
+					hideError(password, 'passwordErrorShort');
+				}
+				isValid = false;
+			} else {
+				hideError(password, 'passwordErrorWeak');
+				hideError(password, 'passwordErrorShort');
+			}
+
+			submitBtn.disabled = !isValid;
+		}
+
+		function validatePassword(password) {
+			const minLength = password.length >= 8;
+			const hasUpper = /[A-Z]/.test(password);
+			const hasNumber = /[0-9]/.test(password);
+
+			passwordReqs.length.classList.toggle('met', minLength);
+			passwordReqs.upper.classList.toggle('met', hasUpper);
+			passwordReqs.number.classList.toggle('met', hasNumber);
+
+			return {
+				isValid: minLength && hasUpper && hasNumber,
+				hasMinLength: minLength,
+				hasUpper,
+				hasNumber
+			};
+		}
+
+		function showError(input, errorId) {
+			input.classList.add('input-error');
+			input.classList.remove('input-success');
+			document.getElementById(errorId).style.display = 'block';
+		}
+
+		function hideError(input, errorId) {
+			input.classList.remove('input-error');
+			input.classList.add('input-success');
+			document.getElementById(errorId).style.display = 'none';
+		}
+
+		function showSuccessPopup() {
+			successPopup.style.display = 'flex';
+		}
+
+		function closePopup() {
+			successPopup.style.display = 'none';
+			form.reset();
+			inputs.forEach(input => {
+				input.classList.remove('input-success');
+			});
+			submitBtn.disabled = true;
+			Object.values(passwordReqs).forEach(req => req.classList.remove('met'));
+		}
+
+		form.addEventListener('submit', (e) => {
+			e.preventDefault();
+			if (!submitBtn.disabled) {
+				const formData = new FormData(form);
+				const data = Object.fromEntries(formData);
+				console.log('Form submitted:', data);
+				// Here you would typically send the data to your server
+				showSuccessPopup();
+			}
+		});
+	</script>
+</body>
+
+</html>
