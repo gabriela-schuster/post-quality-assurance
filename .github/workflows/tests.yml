@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    # env:
+      # no env variables needed
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Checkout Backend
+        run: |
+          cd backend
+          npm i
+
+      - name: Test
+        run: |
+          cd backend
+          npx jest src/users/
+
+      # example of sonar scan CI integration
+      # - name: Sonar Scan
+      #   uses: sonarsource/sonarqube-scan-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # - uses: sonarsource/sonarqube-quality-gate-action@master
+      #   timeout-minutes: 5
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
